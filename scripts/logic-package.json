@@ -1,6 +1,6 @@
 {
   "name": "@deepctrls/craftjs",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "DeepCtrls' fork of the Craft.js React page editor framework",
   "homepage": "https://github.com/hnldlsjzt/craft.js",
   "repository": {

@@ -248,8 +248,7 @@ dependencies continue to resolve. The release process builds the utilities and
 core, then stages the renamed core package with CommonJS, ES modules, and
 TypeScript declarations in `release/logic-craftjs`.
 
-For the version preflight, build, exact-tarball verification, manual publish and
-consumer-update checklist, follow the [manual release guide](https://github.com/hnldlsjzt/craft.js/blob/main/docs/manual-release.md).
+For release preparation, automated publishing and failure recovery, follow the [automated release guide](https://github.com/hnldlsjzt/craft.js/blob/main/docs/release.md).
 Release metadata and the fork version are maintained in
 `scripts/logic-package.json`.
 

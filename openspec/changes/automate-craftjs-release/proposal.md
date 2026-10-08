@@ -36,6 +36,6 @@
 ## Impact
 
 - 工作流：`.github/workflows/release.yml`；增加创建 tag / Release 所需的最小 `contents: write` 权限，并保持 npm 的 `id-token: write` 只用于发布 job。
-- 文档：`docs/manual-release.md`；版本来源、发布 README、发布验证记录仍由发布人维护。
+- 文档：`docs/release.md`；版本来源、发布 README、发布验证记录仍由发布人维护。
 - 仓库外设置：GitHub Actions 需在 fork 上启用；npm Trusted Publisher 必须与 `hnldlsjzt/craft.js`、`release.yml` 和 OIDC 权限匹配。
 - 不新增依赖，不改变根目录 Changesets 发布路径或 `@deepctrls/craftjs` 的包结构。

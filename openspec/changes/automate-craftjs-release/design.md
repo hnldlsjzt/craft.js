@@ -41,7 +41,7 @@
 
 1. 由发布人先在 `hnldlsjzt/craft.js` 的 Actions 页面启用 fork 中的工作流，并在 npm 配置匹配的 Trusted Publisher。
 2. 修改 `.github/workflows/release.yml`：收窄触发条件、按 job 设置权限，并增加发布后的记录创建 job。
-3. 更新 `docs/manual-release.md`，说明首次配置、正常发布检查、重复版本行为及同一 run 的恢复步骤。
+3. 更新 `docs/release.md`，说明首次配置、正常发布检查、重复版本行为及同一 run 的恢复步骤。
 4. 校验工作流和文档变更，通过代码评审后合入 `hnldlsjzt/craft.js:main`，再进行首次自动发布。
 
 回滚时恢复工作流和文档变更。已发布的 npm 版本、tag 和 Release 属于已产生的发布记录，需单独人工处理。
