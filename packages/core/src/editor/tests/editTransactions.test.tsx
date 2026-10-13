@@ -27,13 +27,15 @@ function makeNodes(): Nodes {
 
 function renderStore(
   policy: boolean | EditAccessPolicy = true,
-  locks: Record<string, EditorLock> = {}
+  locks: Record<string, EditorLock> = {},
+  prepare?: (nodes: Nodes) => void
 ) {
   const onEditDenied = jest.fn();
   const nodes = makeNodes();
   for (const [id, lock] of Object.entries(locks)) {
     nodes[id].data.custom.editorLock = lock;
   }
+  prepare?.(nodes);
   const { result, unmount } = renderHook(() =>
     useEditorStore({ editAccess: policy, onEditDenied }, () => {})
   );
@@ -521,6 +523,40 @@ describe('editor structural access', () => {
       expectUnchanged(store, before);
     }
   );
+
+  describe('documents loaded with detached nodes', () => {
+    const withOrphans = (nodes: Nodes) => {
+      for (const [id, parent] of [
+        ['orphan', 'gone'],
+        ['orphanChild', 'orphan'],
+      ]) {
+        nodes[id] = createNode({ id, data: { type: 'div', parent } });
+      }
+      nodes.orphan.data.nodes = ['orphanChild'];
+    };
+
+    it('still allows structural edits', () => {
+      const { store, onEditDenied } = renderStore(true, {}, withOrphans);
+      act(() => store.actions.move('child', 'outside', 0));
+      expect(store.query.node('outside').get().data.nodes).toEqual(['child']);
+      act(() => store.actions.delete('outside'));
+      expect(store.query.node('outside').get()).toBeUndefined();
+      expect(store.query.node('orphan').get()).toBeDefined();
+      expect(onEditDenied).not.toHaveBeenCalled();
+    });
+
+    it('rejects edits that detach further nodes', () => {
+      const { store, onEditDenied } = renderStore(true, {}, withOrphans);
+      const before = capture(store);
+      act(() =>
+        store.actions.setState((draft) => {
+          draft.nodes.parent.data.nodes = [];
+        })
+      );
+      expectUnchanged(store, before);
+      expect(onEditDenied.mock.calls[0][0].reason).toBe('invalid-tree');
+    });
+  });
 
   it('allows a complete parent reassignment in one setState transaction', () => {
     const { store } = renderStore();

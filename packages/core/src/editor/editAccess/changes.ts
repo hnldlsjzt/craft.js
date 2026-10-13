@@ -54,8 +54,31 @@ export function hasChangedPath(
   return predicate(path);
 }
 
-/** Structural edits must leave one rooted tree with consistent parent references. */
-export function hasValidTree(state: EditorState): boolean {
+/** Ids reachable from ROOT, tolerating malformed links in loaded documents. */
+function attachedNodeIds(state: EditorState): Set<string> {
+  const visited = new Set<string>();
+  const pending = [ROOT_NODE];
+  while (pending.length) {
+    const id = pending.pop();
+    const data = state.nodes[id]?.data;
+    if (!data || visited.has(id)) continue;
+    visited.add(id);
+    if (Array.isArray(data.nodes)) pending.push(...data.nodes);
+    if (isContainer(data.linkedNodes))
+      pending.push(...(Object.values(data.linkedNodes) as string[]));
+  }
+  return visited;
+}
+
+/**
+ * Structural edits must leave one rooted tree with consistent parent references.
+ * Detached nodes already present in `previous` (legacy documents) are tolerated;
+ * edits may not detach or add any others.
+ */
+export function hasValidTree(
+  state: EditorState,
+  previous: EditorState
+): boolean {
   const root = state.nodes[ROOT_NODE];
   if (!root?.data || root.data.parent) return false;
   const visited = new Set<string>();
@@ -81,7 +104,12 @@ export function hasValidTree(state: EditorState): boolean {
       pending.push({ id: child, parent: id });
     }
   }
-  return visited.size === Object.keys(state.nodes).length;
+  const ids = Object.keys(state.nodes);
+  if (visited.size === ids.length) return true;
+  const attached = attachedNodeIds(previous);
+  return ids.every(
+    (id) => visited.has(id) || (previous.nodes[id] && !attached.has(id))
+  );
 }
 
 export function hasStructureChange(previous: Node, next: Node): boolean {

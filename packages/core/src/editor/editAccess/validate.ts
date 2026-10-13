@@ -162,5 +162,5 @@ export function validateEditorChange(
     )
       return false;
   }
-  return !structureChanged || hasValidTree(next) || reject('invalid-tree');
+  return !structureChanged || hasValidTree(next, previous) || reject('invalid-tree');
 }
