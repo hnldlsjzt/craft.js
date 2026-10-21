@@ -1,7 +1,7 @@
 import { QueryCallbacksFor, Delete, PatchListenerAction } from '@craftjs/utils';
 
 import { EditAccessPolicy } from './editAccess';
-import { EditDenied } from './editTransaction';
+import { DocumentChange, EditDenied } from './editTransaction';
 import { Placement } from './events';
 import { Nodes, NodeEventTypes, NodeId, Node } from './nodes';
 
@@ -12,6 +12,8 @@ import { CoreEventHandlers } from '../events';
 
 export type Options = {
   onEditDenied?: (denial: EditDenied) => void;
+  /** Called after an accepted change modifies persisted node data. */
+  onDocumentChange?: (change: DocumentChange) => void;
   onRender: React.ComponentType<{ render: React.ReactElement }>;
   onBeforeMoveEnd: (
     targetNode: Node,

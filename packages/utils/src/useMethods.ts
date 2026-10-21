@@ -110,6 +110,8 @@ export type Options<S = any, R extends MethodRecordBase<S> = any, Q = any> = {
     action: Action,
     patches: Patch[]
   ) => boolean | void;
+  /** Called after a change passes validation and is committed. */
+  onCommit?: CommitListener<S, Options<S, R, Q>>;
 };
 
 export type MethodsOrOptions<
@@ -166,6 +168,12 @@ export type PatchListenerAction<M extends MethodsOrOptions> = {
   params: any;
   patches: Patch[];
 };
+
+export type CommitListener<S, M extends MethodsOrOptions> = (
+  newState: S,
+  previousState: S,
+  actionPerformedWithPatches: PatchListenerAction<M>
+) => void;
 
 export type PatchListener<
   S,
@@ -225,17 +233,20 @@ export function useMethods<
   let ignoreHistoryForActionsRef = useRef([]);
   let normalizeHistoryRef = useRef<any>(() => {});
   const validateChangeRef = useRef<Options<S>['validateChange']>(undefined);
+  const commitListenerRef = useRef<Options<S>['onCommit']>(undefined);
 
   if (typeof methodsOrOptions === 'function') {
     methodsFactory = methodsOrOptions;
     ignoreHistoryForActionsRef.current = [];
     normalizeHistoryRef.current = undefined;
     validateChangeRef.current = undefined;
+    commitListenerRef.current = undefined;
   } else {
     methodsFactory = methodsOrOptions.methods;
     ignoreHistoryForActionsRef.current = methodsOrOptions.ignoreHistoryForActions as any;
     normalizeHistoryRef.current = methodsOrOptions.normalizeHistory;
     validateChangeRef.current = methodsOrOptions.validateChange;
+    commitListenerRef.current = methodsOrOptions.onCommit;
   }
 
   const patchListenerRef = useRef(patchListener);
@@ -389,6 +400,11 @@ export function useMethods<
       }
       stateRef.current = change.state;
       if (change.state !== previousState) {
+        commitListenerRef.current?.(change.state, previousState, {
+          type: action.type,
+          params: action.payload,
+          patches: change.patches,
+        });
         watcher.notify(change.patches);
       }
     },

@@ -12,6 +12,15 @@ export type EditTransactionSource =
   | 'derived-binding'
   | 'runtime-data';
 
+export type DocumentChangeSource = EditTransactionSource | 'history';
+
+export type DocumentChange = {
+  revision: number;
+  source: DocumentChangeSource;
+  actionType: string;
+  changedNodeIds: NodeId[];
+};
+
 export type EditTransactionContext = {
   source?: EditTransactionSource;
   /** Capture the current document revision before starting asynchronous work. */

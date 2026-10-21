@@ -2,6 +2,7 @@ import {
   useMethods,
   SubscriberAndCallbacksFor,
   PatchListener,
+  CommitListener,
 } from '@craftjs/utils';
 
 import { ActionMethods } from './actions';
@@ -96,11 +97,15 @@ export const useEditorStore = (
     EditorState,
     typeof ActionMethodsWithConfig,
     typeof QueryMethods
-  >
+  >,
+  commitListener?: CommitListener<EditorState, typeof ActionMethodsWithConfig>
 ): EditorStore => {
   // TODO: fix type
   return useMethods(
-    ActionMethodsWithConfig,
+    {
+      ...ActionMethodsWithConfig,
+      onCommit: commitListener,
+    },
     {
       ...editorInitialState,
       options: {

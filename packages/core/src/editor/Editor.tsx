@@ -3,10 +3,11 @@ import * as React from 'react';
 import invariant from 'tiny-invariant';
 
 import { EditorContext } from './EditorContext';
+import { changedNodeIds } from './editAccess/changes';
 import { editorInitialState, useEditorStore } from './store';
 
 import { Events } from '../events';
-import { Options } from '../interfaces';
+import { DocumentChangeSource, Options } from '../interfaces';
 
 type EditorProps = Partial<Options> & {
   children?: React.ReactNode;
@@ -42,6 +43,42 @@ const hasNodeDataChanged = (
   return false;
 };
 
+const HISTORY_ACTIONS_WITH_WRAPPER = [
+  HISTORY_ACTIONS.IGNORE,
+  HISTORY_ACTIONS.MERGE,
+  HISTORY_ACTIONS.THROTTLE,
+];
+
+const unwrapAction = (action: { type: any; params?: any[] }) => {
+  let type = action.type;
+  let params = action.params || [];
+  while (HISTORY_ACTIONS_WITH_WRAPPER.includes(type) && params.length) {
+    type = params[0];
+    params = params.slice(1);
+  }
+  return { type, params };
+};
+
+const isDocumentPatchPath = (path: readonly (string | number)[]) => {
+  if (!path.length) return true;
+  if (path[0] !== 'nodes') return false;
+  return path.length <= 2 || path[2] === 'data';
+};
+
+const getDocumentChangeSource = (action: {
+  type: any;
+  params?: any[];
+}): DocumentChangeSource => {
+  if ([HISTORY_ACTIONS.UNDO, HISTORY_ACTIONS.REDO].includes(action.type))
+    return 'history';
+  const performed = unwrapAction(action);
+  if (performed.type === 'transact') {
+    const context = performed.params[0] || {};
+    return context.source || 'user-edit';
+  }
+  return 'user-edit';
+};
+
 /**
  * A React Component that provides the Editor context
  */
@@ -57,6 +94,7 @@ export const Editor = ({ children, ...options }: EditorProps) => {
   }
 
   const optionsRef = React.useRef(options);
+  const documentRevisionRef = React.useRef(0);
 
   const context = useEditorStore(
     optionsRef.current,
@@ -104,6 +142,19 @@ export const Editor = ({ children, ...options }: EditorProps) => {
           break; // we exit the loop as soon as we find a change in node.data
         }
       }
+    },
+    (_state, _previousState, actionPerformedWithPatches) => {
+      const { patches } = actionPerformedWithPatches;
+      if (!patches.some((patch) => isDocumentPatchPath(patch.path))) return;
+
+      documentRevisionRef.current += 1;
+      const performed = unwrapAction(actionPerformedWithPatches);
+      optionsRef.current.onDocumentChange?.({
+        revision: documentRevisionRef.current,
+        source: getDocumentChangeSource(actionPerformedWithPatches),
+        actionType: String(performed.type),
+        changedNodeIds: changedNodeIds(_previousState, _state, patches),
+      });
     }
   );
 
@@ -189,6 +240,7 @@ export const Editor = ({ children, ...options }: EditorProps) => {
 
   React.useEffect(() => {
     if (!context) return;
+    optionsRef.current.onDocumentChange = options.onDocumentChange;
     const current = context.query.getOptions();
     const changePolicy =
       options.editAccess !== undefined &&
@@ -196,12 +248,22 @@ export const Editor = ({ children, ...options }: EditorProps) => {
     const changeCallback =
       options.onEditDenied !== undefined &&
       current.onEditDenied !== options.onEditDenied;
-    if (!changePolicy && !changeCallback) return;
+    const documentChangeCallback =
+      options.onDocumentChange !== undefined &&
+      current.onDocumentChange !== options.onDocumentChange;
+    if (!changePolicy && !changeCallback && !documentChangeCallback) return;
     context.actions.setOptions((editorOptions) => {
       if (changePolicy) editorOptions.editAccess = options.editAccess;
       if (changeCallback) editorOptions.onEditDenied = options.onEditDenied;
+      if (documentChangeCallback)
+        editorOptions.onDocumentChange = options.onDocumentChange;
     });
-  }, [context, options.editAccess, options.onEditDenied]);
+  }, [
+    context,
+    options.editAccess,
+    options.onEditDenied,
+    options.onDocumentChange,
+  ]);
 
   if (!context) {
     return null;
