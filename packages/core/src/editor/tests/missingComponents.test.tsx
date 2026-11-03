@@ -82,6 +82,47 @@ function renderStore(allowMissingComponents = true) {
 }
 
 describe('optional missing component compatibility', () => {
+  let warn: jest.SpyInstance;
+
+  beforeEach(() => {
+    warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warn.mockRestore();
+  });
+
+  it('warns once per missing name and resolver without losing data', () => {
+    const { store, resolver } = renderStore();
+    const input = document();
+    act(() => store.actions.deserialize(input));
+    act(() => store.actions.deserialize(input));
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('Component <EnergyFlowAnalysis /> is not registered')
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('Component <FutureChart /> is not registered')
+    );
+    expect(store.query.getSerializedNodes()).toEqual(input);
+    expect(Object.keys(resolver)).toEqual(['Known']);
+
+    const other = renderStore();
+    other.store.query.parseSerializedNode(input.missing).toNode();
+    expect(warn).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not warn for registered components, HTML nodes or strict failures', () => {
+    const { store } = renderStore();
+    store.query.parseSerializedNode(node('div')).toNode();
+    store.query.parseSerializedNode(node({ resolvedName: 'Known' })).toNode();
+    const strict = renderStore(false);
+    expect(() =>
+      strict.store.query.parseSerializedNode(document().missing).toNode()
+    ).toThrow();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it('keeps strict behavior when the option is disabled or omitted', () => {
     for (const options of [
       { resolver: { Known } },

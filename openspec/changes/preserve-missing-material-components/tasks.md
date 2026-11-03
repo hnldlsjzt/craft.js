@@ -17,6 +17,8 @@
 
 ## 验证记录
 
+- [x] 补充生产环境可见的缺失物料 console warning，按 resolver/name 去重；新增告警与非告警场景测试，全量 23 个套件、309 项测试通过。
+
 - 2026-11-02：全量 Jest 23 个套件、307 项测试通过；core/utils/layers 构建通过；改动文件 ESLint 和 core TypeScript 检查通过。
 - 全量 Lint 因现有 CRLF 格式错误失败，用户明确暂不处理。
 - 2026-11-03：项目端启用 allowMissingComponents 后，用户确认缺失 EnergyFlowAnalysis 的页面正常加载，符合预期；尚未执行正式发包。

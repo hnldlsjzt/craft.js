@@ -27,6 +27,12 @@ export const getMissingComponent = (
     };
     components.set(name, component);
     namesByComponent.set(component, name);
+    // Warn once per resolver/name, including production, without flooding reloads.
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[Craft.js] Component <${name} /> is not registered in the <Editor> resolver. ` +
+        'It will render null because allowMissingComponents is enabled; its serialized data is preserved.'
+    );
   }
   return component;
 };

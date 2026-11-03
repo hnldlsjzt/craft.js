@@ -4,6 +4,14 @@
 
 ## ADDED Requirements
 
+### Requirement: 缺失物料必须提供诊断告警
+
+兼容模式使用缺失物料占位组件时，系统 MUST 在控制台输出包含组件名称、未注册原因、空渲染和数据保留说明的 warning，包括生产构建。同一 resolver 与组件名称 MUST 只告警一次；已注册组件、HTML 节点与严格模式失败 MUST 不触发该兼容告警。
+
+#### Scenario: 重复加载缺失物料
+- **WHEN** 同一 resolver 下多次加载同名缺失物料
+- **THEN** 控制台只输出一次对应组件的 warning，且文档仍按兼容模式正常加载
+
 ### Requirement: 缺失物料必须可受控加载
 
 当 Editor 的 \\`allowMissingComponents\\` 设置为 true 时，系统 MUST 将序列化文档中 resolver 无法解析的物料节点加载为不产生可见内容的占位节点，而不是因该物料缺失使整个文档加载失败。

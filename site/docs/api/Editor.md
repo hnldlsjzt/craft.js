@@ -40,6 +40,9 @@ and `query.parseSerializedNode`. Only unavailable serialized component names use
 the fallback. Malformed node types or missing/null props still fail.
 
 Missing components render `null`; a missing container also hides its descendants.
+The console emits a warning naming each missing component once per resolver and
+component name, including production builds. Repeated loads with the same
+resolver do not repeat the warning.
 Their nodes, child/linked-node references, custom data, and props remain available
 for serialization and undo/redo. Unknown props are preserved as opaque data,
 including null values and arrays named `children`. Registering the real component

@@ -30,6 +30,13 @@ Continue importing from `@craftjs/core` in that project. Choose either direct
 installation or the alias; do not install both core packages in one application,
 because their React contexts would be separate.
 
+## Missing components
+
+Set `allowMissingComponents` on `<Editor>` to load documents containing
+unregistered components. Missing components render null while retaining their
+serialized data. A console warning identifies each missing component once per
+resolver and name, including production builds. The option defaults to false.
+
 ## Changes in 0.2.14
 
 - Opt-in editing access for persisted layer locks and temporary subtree isolation.
