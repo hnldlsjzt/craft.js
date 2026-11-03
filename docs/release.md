@@ -38,6 +38,8 @@ git push <remote> main
 
 CI 自动完成预检、测试、构建、lint、打包、React 18/19 验证、发布同一个已验证 tarball，以及创建 tag 和 GitHub Release。无需手工记 SHA、执行 `npm publish` 或创建 tag/Release。
 
+npm 发布成功后，新版本在查询接口中可能短暂返回 404。创建 GitHub Release 前会立即确认一次；若返回 404，则每隔 10 秒重试，最多查询 13 次（等待总计 2 分钟，另计请求耗时）。只有查到匹配的包名与版本才继续；其他 HTTP 错误、网络错误或超时仍会失败。重试耗尽时按下表在原 run 中补跑失败 job，不重复发布。
+
 ## 失败处理
 
 | 失败位置 | 操作 |

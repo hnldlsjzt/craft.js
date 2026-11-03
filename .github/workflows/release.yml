@@ -55,7 +55,7 @@ jobs:
         run: node .yarn/releases/yarn-3.6.3.cjs install --immutable --mode=skip-build
       - name: Test
         run: |
-          node --test scripts/check-logic-release.test.cjs
+          node --test scripts/check-logic-release.test.cjs scripts/confirm-logic-release.test.cjs
           node .yarn/releases/yarn-3.6.3.cjs test --runInBand
       - name: Build the fork package
         run: node scripts/prepare-logic-release.cjs
@@ -128,12 +128,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
           package-manager-cache: false
       - name: Confirm the published npm version
-        run: |
-          published_version="$(npm view "@deepctrls/craftjs@${RELEASE_VERSION}" version --registry=https://registry.npmjs.org/)"
-          if [ "$published_version" != "$RELEASE_VERSION" ]; then
-            echo "::error::npm returned version '$published_version'; expected '$RELEASE_VERSION'."
-            exit 1
-          fi
+        run: node scripts/confirm-logic-release.cjs
       - name: Create or verify the Git tag and GitHub Release
         run: |
           set -euo pipefail
