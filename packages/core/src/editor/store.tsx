@@ -25,6 +25,7 @@ export const editorInitialState: EditorState = {
     onRender: ({ render }) => render,
     onBeforeMoveEnd: () => null,
     resolver: {},
+    allowMissingComponents: false,
     enabled: true,
     indicator: {
       error: 'red',

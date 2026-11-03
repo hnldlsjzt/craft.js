@@ -14,6 +14,7 @@ Creates the context that stores the editor state.
 ### Props
 <API items={[
   ["resolver", "Map<String, React.ComponentType>", "A map of User Components that will be used in the editor"],
+  ["allowMissingComponents?", "boolean", "Optional. Defaults to false. Render unregistered serialized User Components as null while preserving their original names and data."],
   ["enabled?", "boolean", "Optional. If set to false, all editing capabilities will be disabled"],
   ["indicator?", 'Record<"success" | "error", String>', "Optional. The colour to use for the drop indicator. The colour set in 'success' will be used when the indicator shows a droppable location; otherwise the colour set in 'error' will be used."],
   ["onRender?", "React.ComponentType<{element: React.ReactElement}>", "Optional. Specify a custom component to render every User Element in the editor."],
@@ -23,6 +24,32 @@ Creates the context that stores the editor state.
 
 
 ## Examples
+
+### Loading documents with unavailable components
+
+Enable compatibility when loading documents created with a different component library version:
+
+```jsx
+<Editor resolver={{ Text, Container }} allowMissingComponents>
+  <Frame data={savedDocument} />
+</Editor>
+```
+
+The option applies to `Frame`, `actions.deserialize`, transaction deserialization,
+and `query.parseSerializedNode`. Only unavailable serialized component names use
+the fallback. Malformed node types or missing/null props still fail.
+
+Missing components render `null`; a missing container also hides its descendants.
+Their nodes, child/linked-node references, custom data, and props remain available
+for serialization and undo/redo. Unknown props are preserved as opaque data,
+including null values and arrays named `children`. Registering the real component
+and loading the document again restores normal rendering.
+
+No resolver entries are added and no additional `setOptions` action or document
+pre-scan is needed. Empty component functions are cached by resolver and missing
+name; the cache does not retain document payloads. With the option omitted or
+false, existing strict node-loading behavior is retained. To change it on an
+existing store, use `actions.setOptions(options => { options.allowMissingComponents = true; })`.
 
 ### Custom render user elements
 By default, every user element is rendered just as it is. However, if you'd like to, for example, wrap every user element inside a `div`, you can do so through the `onRender` prop:

@@ -2,6 +2,8 @@ import { ERROR_NOT_IN_RESOLVER } from '@craftjs/utils';
 import React from 'react';
 import invariant from 'tiny-invariant';
 
+import { getMissingComponentName } from './missingComponent';
+
 import { Resolver } from '../interfaces';
 
 type ReversedResolver = Map<React.ComponentType | string, string>;
@@ -50,7 +52,8 @@ export const resolveComponent = (
     return comp;
   }
 
-  const resolvedName = searchComponentInResolver(resolver, comp);
+  const resolvedName =
+    searchComponentInResolver(resolver, comp) || getMissingComponentName(comp);
 
   invariant(
     resolvedName,

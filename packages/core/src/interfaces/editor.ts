@@ -23,6 +23,8 @@ export type Options = {
   /** Called on store notifications, including DOM/events; does not serialize or diff nodes. */
   onNodesChange: (query: QueryCallbacksFor<typeof QueryMethods>) => void;
   resolver: Resolver;
+  /** Render unregistered serialized components as null while retaining their data. Disabled by default. */
+  allowMissingComponents?: boolean;
   enabled: boolean;
   /** Opt-in node editing protection. Omit or use false for legacy behavior. */
   editAccess?: boolean | EditAccessPolicy;

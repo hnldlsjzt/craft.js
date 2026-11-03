@@ -1,5 +1,6 @@
 import React, { Children } from 'react';
 
+import { getMissingComponentName } from './missingComponent';
 import { resolveComponent } from './resolveComponent';
 
 import { NodeData, ReducedComp, SerializedNode } from '../interfaces';
@@ -17,6 +18,13 @@ export const serializeComp = (
   resolver: Resolver
 ): ReducedComp => {
   let { type, isCanvas, props } = data;
+  const missingName = getMissingComponentName(type);
+  if (missingName) {
+    // Preserve unknown material payloads verbatim, including null values and
+    // raw children data that the normal JSX serializer cannot interpret.
+    return { type: { resolvedName: missingName }, isCanvas: !!isCanvas, props };
+  }
+
   props = Object.keys(props).reduce((result: Record<string, any>, key) => {
     const prop = props[key];
 

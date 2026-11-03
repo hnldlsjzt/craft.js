@@ -65,7 +65,8 @@ describe('query', () => {
       it('should call deserializeNode', () => {
         expect(mockedDeserializeNode).toBeCalledWith(
           data,
-          state.options.resolver
+          state.options.resolver,
+          state.options.allowMissingComponents
         );
       });
 

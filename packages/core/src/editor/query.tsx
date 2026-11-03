@@ -192,7 +192,11 @@ export function QueryMethods(state: EditorState) {
 
     parseSerializedNode: (serializedNode: SerializedNode) => ({
       toNode(normalize?: (node: Node) => void): Node {
-        const data = deserializeNode(serializedNode, state.options.resolver);
+        const data = deserializeNode(
+          serializedNode,
+          state.options.resolver,
+          state.options.allowMissingComponents
+        );
         invariant(data.type, ERROR_NOT_IN_RESOLVER);
 
         const id = typeof normalize === 'string' && normalize;

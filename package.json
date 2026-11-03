@@ -4,6 +4,7 @@
   "author": "Prev Wong <prevwong@gmail.com>",
   "scripts": {
     "pack:logic": "node scripts/prepare-logic-release.cjs && npm pack ./release/logic-craftjs",
+    "patch:deeplogic-designer": "node scripts/patch-deeplogic-designer.cjs",
     "version:logic:patch": "node scripts/bump-logic-patch.cjs",
     "dev": "npx lerna run clean --stream && npx tsc --p packages/utils --skipLibCheck --emitDeclarationOnly && npx tsc --p packages/core --skipLibCheck --emitDeclarationOnly && npx lerna run bundle --stream --ignore site --ignore 'example-*' && npx lerna run start --parallel --ignore docs",
     "dev:site": "lerna run start --scope site",
