@@ -32,6 +32,7 @@ import {
 import { fromEntries } from '../utils/fromEntries';
 import { getNodesFromSelector } from '../utils/getNodesFromSelector';
 import { removeNodeFromEvents } from '../utils/removeNodeFromEvents';
+import { repairParentReferences } from '../utils/repairParentReferences';
 
 const Methods = (
   state: EditorState,
@@ -249,7 +250,17 @@ const Methods = (
         ];
       });
 
-      this.replaceNodes(fromEntries(nodePairs));
+      const nodes: Nodes = fromEntries(nodePairs);
+      const repaired = repairParentReferences(nodes);
+      if (repaired.length) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[Craft.js] Repaired ${repaired.length} inconsistent parent reference(s) while loading the document: ` +
+            repaired.join(', ')
+        );
+      }
+
+      this.replaceNodes(nodes);
     },
 
     /**
