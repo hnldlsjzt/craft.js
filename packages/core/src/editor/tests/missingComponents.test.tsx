@@ -99,7 +99,9 @@ describe('optional missing component compatibility', () => {
     act(() => store.actions.deserialize(input));
     expect(warn).toHaveBeenCalledTimes(2);
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('Component <EnergyFlowAnalysis /> is not registered')
+      expect.stringContaining(
+        'Component <EnergyFlowAnalysis /> is not registered'
+      )
     );
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('Component <FutureChart /> is not registered')
